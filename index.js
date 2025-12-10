@@ -553,4 +553,18 @@ client.on(Events.InteractionCreate, async (interaction) => {
     }
   }
 });
+client.login(TOKEN);
 
+const express = require("express");
+const server = express();
+
+server.all("/", (req, res) => {
+  res.send("Bot Online");
+});
+
+// ⚠️ Render te donne un port automatiquement
+const PORT = process.env.PORT || 3000;
+
+server.listen(PORT, () => {
+  console.log(`Serveur actif sur le port ${PORT}`);
+});
