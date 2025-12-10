@@ -554,6 +554,16 @@ client.on(Events.InteractionCreate, async (interaction) => {
   }
 });
 client.login(TOKEN);
+// Webhook pour dire que le bot vient de redémarrer
+const WEBHOOK_URL = process.env.WEBHOOK_URL;
+
+fetch(WEBHOOK_URL, {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    content: "🔄 Le bot vient de redémarrer et est maintenant en ligne !"
+  })
+}).catch(err => console.log("Erreur webhook :", err));
 
 const express = require("express");
 const server = express();
