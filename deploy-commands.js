@@ -1,9 +1,21 @@
 const { REST, Routes, SlashCommandBuilder } = require("discord.js");
 
-const TOKEN = process.env.TOKEN; // ⚠ même token que dans index.js
-const CLIENT_ID = process.env.CLIENT_ID; // ⚠ ID de l'application (pas le guild id)
+const TOKEN = process.env.TOKEN || "TON_TOKEN_ICI";
+const CLIENT_ID = process.env.CLIENT_ID || "TON_CLIENT_ID";
 
 const commands = [];
+
+commands.push(
+  new SlashCommandBuilder()
+    .setName("help")
+    .setDescription("Voir l'aide de TiraBot.")
+);
+
+commands.push(
+  new SlashCommandBuilder()
+    .setName("info")
+    .setDescription("Voir les infos du bot sur ce serveur.")
+);
 
 commands.push(
   new SlashCommandBuilder()
@@ -14,7 +26,79 @@ commands.push(
 commands.push(
   new SlashCommandBuilder()
     .setName("viewplayers")
-    .setDescription("Voir, reset et exporter la liste des joueurs inscrits.")
+    .setDescription("Voir la liste des joueurs inscrits (pagination).")
+);
+
+commands.push(
+  new SlashCommandBuilder()
+    .setName("random")
+    .setDescription("Tirage simple et rapide.")
+    .addStringOption((option) =>
+      option
+        .setName("cible")
+        .setDescription("Qui participe au tirage ?")
+        .setRequired(false)
+        .addChoices(
+          { name: "Uniquement les inscrits (/player)", value: "inscrits" },
+          { name: "Tous les membres humains du serveur", value: "tous" }
+        )
+    )
+    .addIntegerOption((option) =>
+      option
+        .setName("nombre")
+        .setDescription("Nombre de personnes à tirer au sort")
+        .setRequired(false)
+    )
+);
+
+commands.push(
+  new SlashCommandBuilder()
+    .setName("panel")
+    .setDescription("Créer un panneau avec bouton pour s'inscrire.")
+);
+
+commands.push(
+  new SlashCommandBuilder()
+    .setName("blacklistuser")
+    .setDescription("Gérer la blacklist d'utilisateurs.")
+    .addUserOption((option) =>
+      option
+        .setName("utilisateur")
+        .setDescription("Utilisateur à ajouter/retirer de la blacklist.")
+        .setRequired(true)
+    )
+    .addStringOption((option) =>
+      option
+        .setName("action")
+        .setDescription("Ajouter ou retirer.")
+        .setRequired(true)
+        .addChoices(
+          { name: "Ajouter", value: "add" },
+          { name: "Retirer", value: "remove" }
+        )
+    )
+);
+
+commands.push(
+  new SlashCommandBuilder()
+    .setName("blacklistrole")
+    .setDescription("Gérer la blacklist de rôles.")
+    .addRoleOption((option) =>
+      option
+        .setName("role")
+        .setDescription("Rôle à ajouter/retirer de la blacklist.")
+        .setRequired(true)
+    )
+    .addStringOption((option) =>
+      option
+        .setName("action")
+        .setDescription("Ajouter ou retirer.")
+        .setRequired(true)
+        .addChoices(
+          { name: "Ajouter", value: "add" },
+          { name: "Retirer", value: "remove" }
+        )
+    )
 );
 
 commands.push(
@@ -38,7 +122,10 @@ commands.push(
         .setRequired(true)
     )
     .addStringOption((option) =>
-      option.setName("nom").setDescription("Nom du tirage").setRequired(true)
+      option
+        .setName("nom")
+        .setDescription("Nom du tirage")
+        .setRequired(true)
     )
     .addStringOption((option) =>
       option
@@ -49,17 +136,13 @@ commands.push(
     .addChannelOption((option) =>
       option
         .setName("salon")
-        .setDescription(
-          "Salon où annoncer le tirage (sinon celui de la commande)"
-        )
+        .setDescription("Salon où annoncer le tirage (sinon celui de la commande)")
         .setRequired(false)
     )
     .addRoleOption((option) =>
       option
         .setName("role")
-        .setDescription(
-          "Rôle à donner aux gagnants (facultatif, jamais aux bots)"
-        )
+        .setDescription("Rôle à donner aux gagnants (facultatif, jamais aux bots)")
         .setRequired(false)
     )
 );
@@ -99,9 +182,7 @@ commands.push(
     .addRoleOption((option) =>
       option
         .setName("role")
-        .setDescription(
-          "Rôle à donner aux gagnants (facultatif, jamais aux bots)"
-        )
+        .setDescription("Rôle à donner aux gagnants (facultatif, jamais aux bots)")
         .setRequired(false)
     )
 );
@@ -114,10 +195,11 @@ const rest = new REST({ version: "10" }).setToken(TOKEN);
   try {
     console.log("Déploiement des commandes...");
     await rest.put(Routes.applicationCommands(CLIENT_ID), {
-      body: commandsJSON,
+      body: commandsJSON
     });
     console.log("Commandes slash déployées avec succès.");
   } catch (error) {
     console.error("Erreur lors du déploiement des commandes :", error);
   }
+})();
 })();
