@@ -1,5 +1,4 @@
 const { Client, GatewayIntentBits, Partials, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, PermissionsBitField, Events, ModalBuilder, TextInputBuilder, TextInputStyle, AttachmentBuilder } = require("discord.js");
-const express = require("express");
 
 const TOKEN = process.env.TOKEN || "TON_TOKEN_ICI";
 
