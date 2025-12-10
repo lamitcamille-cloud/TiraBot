@@ -694,13 +694,6 @@ client.on(Events.InteractionCreate, async (interaction) => {
   }
 });
 
-const server = express();
-server.all("/", (req, res) => {
-  res.send("Bot online");
-});
-const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => console.log("HTTP server actif sur le port " + PORT));
-
 client.login(TOKEN);
 // Webhook pour dire que le bot vient de redémarrer
 const WEBHOOK_URL = process.env.WEBHOOK_URL;
