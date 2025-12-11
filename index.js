@@ -752,9 +752,9 @@ client.on(Events.InteractionCreate, async (interaction) => {
 function getPageFromFooter(embed) {
     return embed.data.footer?.text || "";
 }
-      await processAllCalendars(true, client);
+await processAllCalendars(true, client);
     
-  }
+
 });
 
 
