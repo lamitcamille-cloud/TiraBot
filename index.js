@@ -1,5 +1,6 @@
 const { Client, GatewayIntentBits, Partials, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, PermissionsBitField, Events, ModalBuilder, TextInputBuilder, TextInputStyle, AttachmentBuilder } = require("discord.js");
-const express = require("express");
+const express = require("express");          // <-- GARDE ÇA ICI
+const server = express();                    // <-- ET ÇA AUSSI
 
 const TOKEN = process.env.TOKEN || "TON_TOKEN_ICI";
 
@@ -748,9 +749,6 @@ fetch(WEBHOOK_URL, {
     content: "🔄 Le bot vient de redémarrer et est maintenant en ligne !"
   })
 }).catch(err => console.log("Erreur webhook :", err));
-
-const express = require("express");
-const server = express();
 
 server.all("/", (req, res) => {
   res.send("Bot Online");
