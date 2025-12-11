@@ -330,7 +330,7 @@ if (interaction.commandName === "viewplayers") {
  components: pageData.components,
  ephemeral: true
  });
- }
+ })
  if (interaction.commandName === "random") {
  const scope = interaction.options.getString("cible") || "inscrits";
  const count = interaction.options.getInteger("nombre") || 1;
