@@ -308,11 +308,29 @@ client.on(Events.InteractionCreate, async (interaction) => {
   }
 
   if (interaction.commandName === "viewplayers") {
-    const pageData = buildPlayersPageEmbed(state, 1);
-    return interaction.reply({
-      embeds: [pageData.embed],
-      components: pageData.components,
-      ephemeral: true
+  
+    const state = getGuildState(interaction.guildId);
+    const players = [...state.players];
+
+    if (players.length === 0) {
+        await interaction.reply({
+            content: "Aucun participant inscrit pour le moment.",
+            ephemeral: true,
+        });
+        return;
+    }
+
+    const list = players
+        .map((id, i) => `${i + 1}. <@${id}>`)
+        .join("\n");
+
+    await interaction.reply({
+        content: `Liste des participants (${players.length}) :\n${list}`,
+        ephemeral: true,
+    });
+
+    return;
+}
     });
   }
 
