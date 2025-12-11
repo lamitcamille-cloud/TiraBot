@@ -311,32 +311,19 @@ client.on(Events.InteractionCreate, async (interaction) => {
  ephemeral: true
  });
  }
-// =========================
-  // /viewplayers — SANS BOUTONS
-  // =========================
-  if (interaction.commandName === "viewplayers") {
-    const guildId = interaction.guild.id;
-    const state = getGuildState(guildId);
+// ----------------------
+// /viewplayers
+// ----------------------
+if (interaction.commandName === "viewplayers") {
+  // on construit la page 1
+  const { embed, components } = buildPlayersPageEmbed(state, 1);
 
-    const players = [...state.players];
-
-    const description = players.length
-      ? players.map((id, index) => `${index + 1}. <@${id}>`).join("\n")
-      : "Aucun joueur inscrit pour l'instant.";
-
-    const embed = new EmbedBuilder()
-      .setTitle("Joueurs inscrits")
-      .setColor(0x00aeff)
-      .setDescription(description)
-      .setFooter({
-        text: `Total : ${players.length} joueur(s)`
-      });
-
-    return interaction.reply({
-      embeds: [embed],
-      ephemeral: true
-    });
-  }
+  return interaction.reply({
+    embeds: [embed],     // l’embed "Joueurs inscrits"
+    components,          // [rowNav, rowActions]
+    ephemeral: true
+  });
+}
  const pageData = buildPlayersPageEmbed(state, 1);
  return interaction.reply({
  embeds: [pageData.embed],
