@@ -749,6 +749,8 @@ fetch(WEBHOOK_URL, {
   })
 }).catch(err => console.log("Erreur webhook :", err));
 
+const express = require("express");
+const server = express();
 
 server.all("/", (req, res) => {
   res.send("Bot Online");
