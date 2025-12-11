@@ -1,4 +1,5 @@
 const { Client, GatewayIntentBits, Partials, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, PermissionsBitField, Events, ModalBuilder, TextInputBuilder, TextInputStyle, AttachmentBuilder } = require("discord.js");
+const express = require("express");
 
 const TOKEN = process.env.TOKEN || "TON_TOKEN_ICI";
 
@@ -247,9 +248,9 @@ client.on(Events.InteractionCreate, async (interaction) => {
           "/player : t'inscrire comme joueur",
           "/viewplayers : voir les joueurs inscrits (pagination)",
           "/tirage : tirage classique",
-          "/calendrieravent : configurer le calendrier de l'Avent",
-          "/random : tirer au sort rapidement",
-          "/panel : créer un panneau avec bouton pour s'inscrire",
+          "/calendrieravent : config calendrier de l'Avent",
+          "/random : tirage rapide",
+          "/panel : panneau avec bouton pour s'inscrire",
           "/blacklistuser : ajouter/enlever un joueur de la blacklist",
           "/blacklistrole : ajouter/enlever un rôle de la blacklist"
         ].join("\n")
@@ -280,6 +281,24 @@ client.on(Events.InteractionCreate, async (interaction) => {
   }
 
   if (interaction.commandName === "player") {
+    const isBlacklistedUser = state.blacklistUsers.has(interaction.user.id);
+    let isBlacklistedRole = false;
+    if (state.blacklistRoles.size > 0) {
+      for (const roleId of state.blacklistRoles) {
+        if (interaction.member.roles.cache.has(roleId)) {
+          isBlacklistedRole = true;
+          break;
+        }
+      }
+    }
+
+    if (isBlacklistedUser || isBlacklistedRole) {
+      return interaction.reply({
+        content: "Tu es blacklisté, tu ne peux pas t'inscrire.",
+        ephemeral: true
+      });
+    }
+
     state.players.add(interaction.user.id);
     return interaction.reply({
       content: "Tu es maintenant inscrit pour les tirages.",
@@ -346,7 +365,8 @@ client.on(Events.InteractionCreate, async (interaction) => {
     const action = interaction.options.getString("action", true);
     if (action === "add") {
       state.blacklistUsers.add(user.id);
-      return interaction.reply({ content: `${user} a été ajouté à la blacklist.`, ephemeral: true });
+      state.players.delete(user.id);
+      return interaction.reply({ content: `${user} a été ajouté à la blacklist et retiré des inscrits.`, ephemeral: true });
     } else {
       state.blacklistUsers.delete(user.id);
       return interaction.reply({ content: `${user} a été retiré de la blacklist.`, ephemeral: true });
@@ -358,6 +378,12 @@ client.on(Events.InteractionCreate, async (interaction) => {
     const action = interaction.options.getString("action", true);
     if (action === "add") {
       state.blacklistRoles.add(role.id);
+      for (const userId of Array.from(state.players)) {
+        const member = interaction.guild.members.cache.get(userId);
+        if (member && member.roles.cache.has(role.id)) {
+          state.players.delete(userId);
+        }
+      }
       return interaction.reply({ content: `${role} a été ajouté à la blacklist.`, ephemeral: true });
     } else {
       state.blacklistRoles.delete(role.id);
@@ -417,7 +443,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
         { name: "Récompense", value: prize, inline: false },
         {
           name: "Gagnant(s)",
-          value: winners.map((id) => `<@${id}>`).join("\n"),
+          value: winners.map((id) => `• <@${id}>`).join("\n"),
           inline: false
         },
         {
@@ -525,6 +551,24 @@ client.on(Events.InteractionCreate, async (interaction) => {
     const state = getGuildState(guildId);
 
     if (interaction.customId === "panel_register" || interaction.customId === "panel_participate") {
+      const isBlacklistedUser = state.blacklistUsers.has(interaction.user.id);
+      let isBlacklistedRole = false;
+      if (state.blacklistRoles.size > 0) {
+        const member = await interaction.guild.members.fetch(interaction.user.id).catch(() => null);
+        if (member) {
+          for (const roleId of state.blacklistRoles) {
+            if (member.roles.cache.has(roleId)) {
+              isBlacklistedRole = true;
+              break;
+            }
+          }
+        }
+      }
+
+      if (isBlacklistedUser || isBlacklistedRole) {
+        return interaction.reply({ content: "Tu es blacklisté, tu ne peux pas t'inscrire.", ephemeral: true });
+      }
+
       state.players.add(interaction.user.id);
       return interaction.reply({ content: "Tu es inscrit pour les tirages.", ephemeral: true });
     }
@@ -536,7 +580,6 @@ client.on(Events.InteractionCreate, async (interaction) => {
       let newPage = page;
 
       if (interaction.customId === "vp_first") newPage = 1;
-      if (interaction.customId === "vp_last") newPage = total;
       if (interaction.customId === "vp_prev") newPage = page - 1;
       if (interaction.customId === "vp_next") newPage = page + 1;
       if (interaction.customId === "vp_prev2") newPage = page - 2;
@@ -693,6 +736,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
   }
 });
 
+
 client.login(TOKEN);
 // Webhook pour dire que le bot vient de redémarrer
 const WEBHOOK_URL = process.env.WEBHOOK_URL;
@@ -705,8 +749,6 @@ fetch(WEBHOOK_URL, {
   })
 }).catch(err => console.log("Erreur webhook :", err));
 
-const express = require("express");
-const server = express();
 
 server.all("/", (req, res) => {
   res.send("Bot Online");
