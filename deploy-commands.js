@@ -202,4 +202,3 @@ const rest = new REST({ version: "10" }).setToken(TOKEN);
     console.error("Erreur lors du déploiement des commandes :", error);
   }
 })();
-})();
