@@ -749,9 +749,11 @@ client.on(Events.InteractionCreate, async (interaction) => {
           `Salon : ${baseConfig.channelId ? `<#${baseConfig.channelId}>` : "par défaut"}`,
         ephemeral: true
       });
-
+function getPageFromFooter(embed) {
+    return embed.data.footer?.text || "";
+}
       await processAllCalendars(true, client);
-    }
+    
   }
 });
 
