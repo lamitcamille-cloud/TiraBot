@@ -1,7 +1,23 @@
-const { Client, GatewayIntentBits, Partials, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, PermissionsBitField, Events, ModalBuilder, TextInputBuilder, TextInputStyle, AttachmentBuilder } = require("discord.js");
+const {
+  Client,
+  GatewayIntentBits,
+  Partials,
+  EmbedBuilder,
+  ActionRowBuilder,
+  ButtonBuilder,
+  ButtonStyle,
+  PermissionsBitField,
+  Events,
+  ModalBuilder,
+  TextInputBuilder,
+  TextInputStyle,
+  AttachmentBuilder,
+} = require("discord.js");
 const express = require("express");
 
-const TOKEN = process.env.TOKEN || "TON_TOKEN_ICI";
+const TOKEN =
+   ||
+  "TON_TOKEN_ICI";
 
 const guildStates = new Map();
 const pendingCalendars = new Map();
@@ -12,7 +28,7 @@ function getGuildState(guildId) {
       players: new Set(),
       calendar: null,
       blacklistUsers: new Set(),
-      blacklistRoles: new Set()
+      blacklistRoles: new Set(),
     });
   }
   return guildStates.get(guildId);
@@ -37,15 +53,16 @@ const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildMembers,
-    GatewayIntentBits.GuildMessages
+    GatewayIntentBits.GuildMessages,
   ],
-  partials: [Partials.Channel]
+  partials: [Partials.Channel],
 });
 
 function filterParticipantsWithBlacklist(membersArray, state, guild) {
   const blacklistUsers = state.blacklistUsers;
   const blacklistRoles = state.blacklistRoles;
-  if (blacklistUsers.size === 0 && blacklistRoles.size === 0) return membersArray;
+  if (blacklistUsers.size === 0 && blacklistRoles.size === 0)
+    return membersArray;
   return membersArray.filter((id) => {
     if (blacklistUsers.has(id)) return false;
     if (blacklistRoles.size === 0) return true;
@@ -58,7 +75,12 @@ function filterParticipantsWithBlacklist(membersArray, state, guild) {
   });
 }
 
-async function runCalendarDrawForDay(guild, state, day, options = { retro: false }) {
+async function runCalendarDrawForDay(
+  guild,
+  state,
+  day,
+  options = { retro: false }
+) {
   const cal = state.calendar;
   if (!cal || !cal.active) return;
   if (cal.doneDays.has(day)) return;
@@ -85,10 +107,16 @@ async function runCalendarDrawForDay(guild, state, day, options = { retro: false
       .map((m) => m.id);
   }
 
-  participantIds = filterParticipantsWithBlacklist(participantIds, state, guild);
+  participantIds = filterParticipantsWithBlacklist(
+    participantIds,
+    state,
+    guild
+  );
 
   if (participantIds.length === 0) {
-    await channel.send(`Impossible de faire le tirage pour le ${day} décembre : aucun participant éligible.`);
+    await channel.send(
+      `Impossible de faire le tirage pour le ${day} décembre : aucun participant éligible.`
+    );
     cal.doneDays.add(day);
     return;
   }
@@ -103,23 +131,25 @@ async function runCalendarDrawForDay(guild, state, day, options = { retro: false
       {
         name: "Gagnant(s)",
         value: winners.map((id) => `<@${id}>`).join("\n"),
-        inline: false
+        inline: false,
       },
       {
         name: "Participants",
         value: `${participantIds.length} joueur(s) éligible(s)`,
-        inline: true
+        inline: true,
       },
       {
         name: "Nombre de gagnants",
         value: `${cal.winnersPerDay}`,
-        inline: true
+        inline: true,
       }
     )
     .setTimestamp();
 
   if (options.retro) {
-    embed.setFooter({ text: "Tirage rétroactif (bot lancé après la date du jour)." });
+    embed.setFooter({
+      text: "Tirage rétroactif (bot lancé après la date du jour).",
+    });
   }
 
   await channel.send({ embeds: [embed] });
@@ -168,7 +198,12 @@ async function processAllCalendars(retroAtStartup, client) {
     }
 
     const hour = now.getHours();
-    if (!cal.doneDays.has(day) && hour >= cal.hour && hour >= 10 && hour <= 18) {
+    if (
+      !cal.doneDays.has(day) &&
+      hour >= cal.hour &&
+      hour >= 10 &&
+      hour <= 18
+    ) {
       await runCalendarDrawForDay(guild, state, day, { retro: false });
     }
   }
@@ -194,26 +229,50 @@ function buildPlayersPageEmbed(state, page) {
     .setTitle("Joueurs inscrits")
     .setColor(0x00aeff)
     .setDescription(description)
-    .setFooter({ text: `Page ${currentPage}/${totalPages} • Total : ${total} joueur(s)` });
+    .setFooter({
+      text: `Page ${currentPage}/${totalPages} • Total : ${total} joueur(s)`,
+    });
 
   const rowNav = new ActionRowBuilder().addComponents(
-    new ButtonBuilder().setCustomId("vp_first").setEmoji("⏮️").setStyle(ButtonStyle.Secondary),
-    new ButtonBuilder().setCustomId("vp_prev2").setEmoji("⏪️").setStyle(ButtonStyle.Secondary),
-    new ButtonBuilder().setCustomId("vp_prev").setEmoji("◀️").setStyle(ButtonStyle.Primary),
-    new ButtonBuilder().setCustomId("vp_next").setEmoji("▶️").setStyle(ButtonStyle.Primary),
-    new ButtonBuilder().setCustomId("vp_next2").setEmoji("⏩️").setStyle(ButtonStyle.Secondary)
+    new ButtonBuilder()
+      .setCustomId("vp_first")
+      .setEmoji("⏮️")
+      .setStyle(ButtonStyle.Secondary),
+    new ButtonBuilder()
+      .setCustomId("vp_prev2")
+      .setEmoji("⏪️")
+      .setStyle(ButtonStyle.Secondary),
+    new ButtonBuilder()
+      .setCustomId("vp_prev")
+      .setEmoji("◀️")
+      .setStyle(ButtonStyle.Primary),
+    new ButtonBuilder()
+      .setCustomId("vp_next")
+      .setEmoji("▶️")
+      .setStyle(ButtonStyle.Primary),
+    new ButtonBuilder()
+      .setCustomId("vp_next2")
+      .setEmoji("⏩️")
+      .setStyle(ButtonStyle.Secondary)
   );
 
   const rowActions = new ActionRowBuilder().addComponents(
-    new ButtonBuilder().setCustomId("players_reset_ask").setLabel("Reset").setStyle(ButtonStyle.Danger),
-    new ButtonBuilder().setCustomId("players_save").setLabel("Sauvegarder (.txt)").setStyle(ButtonStyle.Secondary)
+    new ButtonBuilder()
+      .setCustomId("players_reset_ask")
+      .setLabel("Reset")
+      .setStyle(ButtonStyle.Danger),
+    new ButtonBuilder()
+      .setCustomId("players_save")
+      .setLabel("Sauvegarder (.txt)")
+      .setStyle(ButtonStyle.Secondary)
   );
 
   return { embed, components: [rowNav, rowActions] };
 }
 
 function getPageFromFooter(embed) {
-  if (!embed || !embed.footer || !embed.footer.text) return { page: 1, total: 1 };
+  if (!embed || !embed.footer || !embed.footer.text)
+    return { page: 1, total: 1 };
   const m = embed.footer.text.match(/Page\s+(\d+)\s*\/\s*(\d+)/i);
   if (!m) return { page: 1, total: 1 };
   return { page: parseInt(m[1], 10) || 1, total: parseInt(m[2], 10) || 1 };
@@ -230,7 +289,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
   if (!interaction.inGuild()) {
     return interaction.reply({
       content: "Ce bot fonctionne uniquement dans un serveur.",
-      ephemeral: true
+      ephemeral: true,
     });
   }
 
@@ -252,7 +311,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
           "/random : tirage rapide",
           "/panel : panneau avec bouton pour s'inscrire",
           "/blacklistuser : ajouter/enlever un joueur de la blacklist",
-          "/blacklistrole : ajouter/enlever un rôle de la blacklist"
+          "/blacklistrole : ajouter/enlever un rôle de la blacklist",
         ].join("\n")
       );
     return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -276,59 +335,94 @@ client.on(Events.InteractionCreate, async (interaction) => {
       lines.push("Calendrier de l'Avent : **inactif**");
     }
 
-    const embed = new EmbedBuilder().setTitle("Infos du serveur").setColor(0x00aeff).setDescription(lines.join("\n"));
+    const embed = new EmbedBuilder()
+      .setTitle("Infos du serveur")
+      .setColor(0x00aeff)
+      .setDescription(lines.join("\n"));
     return interaction.reply({ embeds: [embed], ephemeral: true });
   }
 
-
-    if (isBlacklistedUser || isBlacklistedRole) {
-      return interaction.reply({
-        content: "Tu es blacklisté, tu ne peux pas t'inscrire.",
-        ephemeral: true
-      });
-    }
-
-    state.players.add(interaction.user.id);
+  if (isBlacklistedUser || isBlacklistedRole) {
     return interaction.reply({
-      content: "Tu es maintenant inscrit pour les tirages.",
-      ephemeral: true
+      content: "Tu es blacklisté, tu ne peux pas t'inscrire.",
+      ephemeral: true,
     });
-  
+  }
+
+  state.players.add(interaction.user.id);
+  return interaction.reply({
+    content: "Tu es maintenant inscrit pour les tirages.",
+    ephemeral: true,
+  });
 
   if (interaction.commandName === "viewplayers") {
     // ✅ NO PAGINATION: on envoie un fichier + un embed court
-    if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) {
-      return interaction.reply({ content: "❌ Administrateur requis.", ephemeral: true });
+    if (
+      !interaction.member.permissions.has(
+        PermissionsBitField.Flags.Administrator
+      )
+    ) {
+      return interaction.reply({
+        content: "❌ Administrateur requis.",
+        ephemeral: true,
+      });
     }
 
     const ids = Array.from(state.players);
-    const mentionPreview = ids.slice(0, 40).map((id) => `<@${id}>`).join("
-") || "Aucun inscrit.";
+    const mentionPreview =
+      ids
+        .slice(0, 40)
+        .map((id) => `<@${id}>`)
+        .join("") || "Aucun inscrit.";
 
     const embed = new EmbedBuilder()
       .setTitle("Joueurs inscrits")
-      .setColor(0x00AEFF)
-      .setDescription(mentionPreview + (ids.length > 40 ? `
+      .setColor(0x00aeff)
+      .setDescription(
+        mentionPreview +
+          (ids.length > 40
+            ? `
 
-…et ${ids.length - 40} autre(s).` : ""))
+…et ${ids.length - 40} autre(s).`
+            : "")
+      )
       .setFooter({ text: `Total : ${ids.length} joueur(s)` })
       .setTimestamp();
 
-    const content = ids.length ? ids.join("
-") : "";
-    const file = new AttachmentBuilder(Buffer.from(content, "utf-8"), { name: "players.txt" });
+    const content = ids.length ? ids.join("") : "";
+    const file = new AttachmentBuilder(Buffer.from(content, "utf-8"), {
+      name: "players.txt",
+    });
 
     const row = new ActionRowBuilder().addComponents(
-      new ButtonBuilder().setCustomId("players_reset_ask").setLabel("Supprime tout").setStyle(ButtonStyle.Danger),
-      new ButtonBuilder().setCustomId("players_remove_one").setLabel("Supp player").setStyle(ButtonStyle.Secondary),
-      new ButtonBuilder().setCustomId("players_save").setLabel("Exporter").setStyle(ButtonStyle.Primary)
+      new ButtonBuilder()
+        .setCustomId("players_reset_ask")
+        .setLabel("Supprime tout")
+        .setStyle(ButtonStyle.Danger),
+      new ButtonBuilder()
+        .setCustomId("players_remove_one")
+        .setLabel("Supp player")
+        .setStyle(ButtonStyle.Secondary),
+      new ButtonBuilder()
+        .setCustomId("players_save")
+        .setLabel("Exporter")
+        .setStyle(ButtonStyle.Primary)
     );
 
     // On répond avec embed + fichier (si vide, pas de fichier)
     if (ids.length) {
-      return interaction.reply({ embeds: [embed], components: [row], files: [file], ephemeral: true });
+      return interaction.reply({
+        embeds: [embed],
+        components: [row],
+        files: [file],
+        ephemeral: true,
+      });
     }
-    return interaction.reply({ embeds: [embed], components: [row], ephemeral: true });
+    return interaction.reply({
+      embeds: [embed],
+      components: [row],
+      ephemeral: true,
+    });
   }
 
   if (interaction.commandName === "random") {
@@ -345,20 +439,27 @@ client.on(Events.InteractionCreate, async (interaction) => {
         .map((m) => m.id);
     }
 
-    participantIds = filterParticipantsWithBlacklist(participantIds, state, interaction.guild);
+    participantIds = filterParticipantsWithBlacklist(
+      participantIds,
+      state,
+      interaction.guild
+    );
 
     if (participantIds.length === 0) {
-      return interaction.reply({ content: "Aucun participant éligible.", ephemeral: true });
+      return interaction.reply({
+        content: "Aucun participant éligible.",
+        ephemeral: true,
+      });
     }
 
     const n = Math.min(count, participantIds.length);
     const winners = pickRandomUnique(participantIds, n);
 
     return interaction.reply({
-      content: `Résultat random (${scope === "inscrits" ? "inscrits" : "tout le serveur"}) :\n${winners
-        .map((id) => `• <@${id}>`)
-        .join("\n")}`,
-      ephemeral: true
+      content: `Résultat random (${
+        scope === "inscrits" ? "inscrits" : "tout le serveur"
+      }) :\n${winners.map((id) => `• <@${id}>`).join("\n")}`,
+      ephemeral: true,
     });
   }
 
@@ -369,8 +470,14 @@ client.on(Events.InteractionCreate, async (interaction) => {
       .setDescription("Clique sur un bouton ci-dessous pour t'inscrire.");
 
     const row = new ActionRowBuilder().addComponents(
-      new ButtonBuilder().setCustomId("panel_register").setLabel("M'enregistrer (/player)").setStyle(ButtonStyle.Primary),
-      new ButtonBuilder().setCustomId("panel_participate").setLabel("Participer au tirage").setStyle(ButtonStyle.Success)
+      new ButtonBuilder()
+        .setCustomId("panel_register")
+        .setLabel("M'enregistrer (/player)")
+        .setStyle(ButtonStyle.Primary),
+      new ButtonBuilder()
+        .setCustomId("panel_participate")
+        .setLabel("Participer au tirage")
+        .setStyle(ButtonStyle.Success)
     );
 
     return interaction.reply({ embeds: [embed], components: [row] });
@@ -382,10 +489,16 @@ client.on(Events.InteractionCreate, async (interaction) => {
     if (action === "add") {
       state.blacklistUsers.add(user.id);
       state.players.delete(user.id);
-      return interaction.reply({ content: `${user} a été ajouté à la blacklist et retiré des inscrits.`, ephemeral: true });
+      return interaction.reply({
+        content: `${user} a été ajouté à la blacklist et retiré des inscrits.`,
+        ephemeral: true,
+      });
     } else {
       state.blacklistUsers.delete(user.id);
-      return interaction.reply({ content: `${user} a été retiré de la blacklist.`, ephemeral: true });
+      return interaction.reply({
+        content: `${user} a été retiré de la blacklist.`,
+        ephemeral: true,
+      });
     }
   }
 
@@ -400,10 +513,16 @@ client.on(Events.InteractionCreate, async (interaction) => {
           state.players.delete(userId);
         }
       }
-      return interaction.reply({ content: `${role} a été ajouté à la blacklist.`, ephemeral: true });
+      return interaction.reply({
+        content: `${role} a été ajouté à la blacklist.`,
+        ephemeral: true,
+      });
     } else {
       state.blacklistRoles.delete(role.id);
-      return interaction.reply({ content: `${role} a été retiré de la blacklist.`, ephemeral: true });
+      return interaction.reply({
+        content: `${role} a été retiré de la blacklist.`,
+        ephemeral: true,
+      });
     }
   }
 
@@ -427,26 +546,30 @@ client.on(Events.InteractionCreate, async (interaction) => {
         .map((m) => m.id);
     }
 
-    participantIds = filterParticipantsWithBlacklist(participantIds, state, interaction.guild);
+    participantIds = filterParticipantsWithBlacklist(
+      participantIds,
+      state,
+      interaction.guild
+    );
 
     if (participantIds.length === 0) {
       return interaction.reply({
         content: "Aucun participant disponible pour ce tirage.",
-        ephemeral: true
+        ephemeral: true,
       });
     }
 
     if (winnersCount <= 0) {
       return interaction.reply({
         content: "Le nombre de gagnants doit être au moins de 1.",
-        ephemeral: true
+        ephemeral: true,
       });
     }
 
     if (winnersCount > participantIds.length) {
       return interaction.reply({
         content: `Il n'y a pas assez de participants (max ${participantIds.length} gagnant(s)).`,
-        ephemeral: true
+        ephemeral: true,
       });
     }
 
@@ -460,17 +583,17 @@ client.on(Events.InteractionCreate, async (interaction) => {
         {
           name: "Gagnant(s)",
           value: winners.map((id) => `• <@${id}>`).join("\n"),
-          inline: false
+          inline: false,
         },
         {
           name: "Participants",
           value: `${participantIds.length} joueur(s) éligible(s)`,
-          inline: true
+          inline: true,
         },
         {
           name: "Nombre de gagnants",
           value: `${winnersCount}`,
-          inline: true
+          inline: true,
         }
       )
       .setTimestamp();
@@ -479,7 +602,9 @@ client.on(Events.InteractionCreate, async (interaction) => {
 
     for (const id of winners) {
       try {
-        const member = await interaction.guild.members.fetch(id).catch(() => null);
+        const member = await interaction.guild.members
+          .fetch(id)
+          .catch(() => null);
         if (!member) continue;
 
         try {
@@ -498,7 +623,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
 
     return interaction.reply({
       content: `Tirage "${drawName}" effectué avec succès pour ${winnersCount} gagnant(s).`,
-      ephemeral: true
+      ephemeral: true,
     });
   }
 
@@ -510,8 +635,9 @@ client.on(Events.InteractionCreate, async (interaction) => {
 
     if (!isAdmin) {
       return interaction.reply({
-        content: "Tu dois être administrateur pour configurer le calendrier de l'Avent.",
-        ephemeral: true
+        content:
+          "Tu dois être administrateur pour configurer le calendrier de l'Avent.",
+        ephemeral: true,
       });
     }
 
@@ -524,7 +650,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
     if (winnersPerDay <= 0) {
       return interaction.reply({
         content: "Le nombre de gagnants par jour doit être au moins de 1.",
-        ephemeral: true
+        ephemeral: true,
       });
     }
 
@@ -535,7 +661,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
       winnersPerDay,
       hour,
       channelId: channelOption ? channelOption.id : null,
-      roleId: roleOption ? roleOption.id : null
+      roleId: roleOption ? roleOption.id : null,
     });
 
     const modal = new ModalBuilder()
@@ -566,11 +692,16 @@ client.on(Events.InteractionCreate, async (interaction) => {
     const guildId = interaction.guild.id;
     const state = getGuildState(guildId);
 
-    if (interaction.customId === "panel_register" || interaction.customId === "panel_participate") {
+    if (
+      interaction.customId === "panel_register" ||
+      interaction.customId === "panel_participate"
+    ) {
       const isBlacklistedUser = state.blacklistUsers.has(interaction.user.id);
       let isBlacklistedRole = false;
       if (state.blacklistRoles.size > 0) {
-        const member = await interaction.guild.members.fetch(interaction.user.id).catch(() => null);
+        const member = await interaction.guild.members
+          .fetch(interaction.user.id)
+          .catch(() => null);
         if (member) {
           for (const roleId of state.blacklistRoles) {
             if (member.roles.cache.has(roleId)) {
@@ -582,11 +713,17 @@ client.on(Events.InteractionCreate, async (interaction) => {
       }
 
       if (isBlacklistedUser || isBlacklistedRole) {
-        return interaction.reply({ content: "Tu es blacklisté, tu ne peux pas t'inscrire.", ephemeral: true });
+        return interaction.reply({
+          content: "Tu es blacklisté, tu ne peux pas t'inscrire.",
+          ephemeral: true,
+        });
       }
 
       state.players.add(interaction.user.id);
-      return interaction.reply({ content: "Tu es inscrit pour les tirages.", ephemeral: true });
+      return interaction.reply({
+        content: "Tu es inscrit pour les tirages.",
+        ephemeral: true,
+      });
     }
 
     if (interaction.customId.startsWith("vp_")) {
@@ -607,7 +744,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
       const pageData = buildPlayersPageEmbed(state, newPage);
       return interaction.update({
         embeds: [pageData.embed],
-        components: pageData.components
+        components: pageData.components,
       });
     }
 
@@ -619,8 +756,9 @@ client.on(Events.InteractionCreate, async (interaction) => {
 
       if (!isAdmin) {
         return interaction.reply({
-          content: "Tu dois être administrateur pour reset la liste des joueurs.",
-          ephemeral: true
+          content:
+            "Tu dois être administrateur pour reset la liste des joueurs.",
+          ephemeral: true,
         });
       }
 
@@ -638,7 +776,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
       return interaction.reply({
         content: "Tu es sûr de vouloir reset la liste des joueurs inscrits ?",
         components: [row],
-        ephemeral: true
+        ephemeral: true,
       });
     }
 
@@ -650,25 +788,25 @@ client.on(Events.InteractionCreate, async (interaction) => {
 
       if (!isAdmin) {
         return interaction.reply({
-          content: "Tu dois être administrateur pour reset la liste des joueurs.",
-          ephemeral: true
+          content:
+            "Tu dois être administrateur pour reset la liste des joueurs.",
+          ephemeral: true,
         });
       }
 
       state.players.clear();
       return interaction.update({
         content: "Liste des joueurs inscrits réinitialisée.",
-        components: []
+        components: [],
       });
     }
 
     if (interaction.customId === "players_reset_cancel") {
       return interaction.update({
         content: "Reset annulé.",
-        components: []
+        components: [],
       });
     }
-
 
     if (interaction.customId === "players_remove_one") {
       // Modal pour supprimer 1 joueur par ID
@@ -693,33 +831,47 @@ client.on(Events.InteractionCreate, async (interaction) => {
           ? playersArray.map((id, index) => `${index + 1}. ${id}`).join("\n")
           : "Aucun joueur inscrit.";
 
-      const file = new AttachmentBuilder(Buffer.from(content, "utf-8"), { name: "joueurs.txt" });
+      const file = new AttachmentBuilder(Buffer.from(content, "utf-8"), {
+        name: "joueurs.txt",
+      });
 
       return interaction.reply({
         content: "Fichier des joueurs inscrit(s) :",
         files: [file],
-        ephemeral: true
+        ephemeral: true,
       });
     }
   }
 
-
   if (interaction.isModalSubmit()) {
     if (interaction.customId === "players_remove_one_modal") {
-      if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) {
-        return interaction.reply({ content: "❌ Administrateur requis.", ephemeral: true });
+      if (
+        !interaction.member.permissions.has(
+          PermissionsBitField.Flags.Administrator
+        )
+      ) {
+        return interaction.reply({
+          content: "❌ Administrateur requis.",
+          ephemeral: true,
+        });
       }
-      const id = interaction.fields.getTextInputValue("players_remove_one_id").trim();
+      const id = interaction.fields
+        .getTextInputValue("players_remove_one_id")
+        .trim();
       const existed = state.players.delete(id);
-      return interaction.reply({ content: existed ? `✅ <@${id}> supprimé des inscrits.` : "⚠️ ID non trouvé dans les inscrits.", ephemeral: true });
+      return interaction.reply({
+        content: existed
+          ? `✅ <@${id}> supprimé des inscrits.`
+          : "⚠️ ID non trouvé dans les inscrits.",
+        ephemeral: true,
+      });
     }
-
 
     if (interaction.customId === "cal_avent_modal") {
       if (!interaction.inGuild()) {
         return interaction.reply({
           content: "Ce bot fonctionne uniquement dans un serveur.",
-          ephemeral: true
+          ephemeral: true,
         });
       }
 
@@ -730,7 +882,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
       if (!baseConfig) {
         return interaction.reply({
           content: "Aucune configuration de calendrier en cours.",
-          ephemeral: true
+          ephemeral: true,
         });
       }
 
@@ -738,7 +890,8 @@ client.on(Events.InteractionCreate, async (interaction) => {
 
       const state = getGuildState(guildId);
 
-      const rewardsRaw = interaction.fields.getTextInputValue("cal_avent_rewards");
+      const rewardsRaw =
+        interaction.fields.getTextInputValue("cal_avent_rewards");
       const lines = rewardsRaw
         .split("\n")
         .map((l) => l.trim())
@@ -746,8 +899,9 @@ client.on(Events.InteractionCreate, async (interaction) => {
 
       if (lines.length !== 24) {
         return interaction.reply({
-          content: "Tu dois entrer exactement 24 lignes, une par jour du 1 au 24.",
-          ephemeral: true
+          content:
+            "Tu dois entrer exactement 24 lignes, une par jour du 1 au 24.",
+          ephemeral: true,
         });
       }
 
@@ -761,7 +915,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
         channelId: baseConfig.channelId,
         roleId: baseConfig.roleId,
         rewards,
-        doneDays: new Set()
+        doneDays: new Set(),
       };
 
       await interaction.reply({
@@ -770,9 +924,15 @@ client.on(Events.InteractionCreate, async (interaction) => {
           "Période : 1er au 24 décembre\n" +
           `Tirage chaque jour vers ${baseConfig.hour}h (entre 10h et 18h).\n` +
           `Nombre de gagnants par jour : ${baseConfig.winnersPerDay}\n` +
-          `Cible : ${baseConfig.scope === "inscrits" ? "inscrits" : "tous les membres humains"}\n` +
-          `Salon : ${baseConfig.channelId ? `<#${baseConfig.channelId}>` : "par défaut"}`,
-        ephemeral: true
+          `Cible : ${
+            baseConfig.scope === "inscrits"
+              ? "inscrits"
+              : "tous les membres humains"
+          }\n` +
+          `Salon : ${
+            baseConfig.channelId ? `<#${baseConfig.channelId}>` : "par défaut"
+          }`,
+        ephemeral: true,
       });
 
       await processAllCalendars(true, client);
