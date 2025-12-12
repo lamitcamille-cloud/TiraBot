@@ -5,28 +5,12 @@ const CLIENT_ID = process.env.CLIENT_ID || "TON_CLIENT_ID";
 
 const commands = [];
 
-commands.push(
-  new SlashCommandBuilder()
-    .setName("help")
-    .setDescription("Voir l'aide de TiraBot.")
-);
 
-commands.push(
-  new SlashCommandBuilder()
-    .setName("info")
-    .setDescription("Voir les infos du bot sur ce serveur.")
-);
-
-commands.push(
-  new SlashCommandBuilder()
-    .setName("player")
-    .setDescription("S'inscrire comme joueur pour les tirages.")
-);
 
 commands.push(
   new SlashCommandBuilder()
     .setName("viewplayers")
-    .setDescription("Voir la liste des joueurs inscrits .")
+    .setDescription("Voir la liste des joueurs inscrits (pagination).")
 );
 
 commands.push(
