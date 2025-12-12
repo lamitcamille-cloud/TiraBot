@@ -311,15 +311,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
  ephemeral: true
  });
  }
- // ===== /viewplayers sécurisé (si 0 joueurs) =====
-if (interaction.commandName === "viewplayers") {
-    const pageData = buildPlayersPageEmbed(state, 1);
-    return interaction.reply({
-      embeds: [pageData.embed],
-      components: pageData.components,
-      ephemeral: true
-    });
-  }
+
  if (interaction.commandName === "random") {
  const scope = interaction.options.getString("cible") || "inscrits";
  const count = interaction.options.getInteger("nombre") || 1;
