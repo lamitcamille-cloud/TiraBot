@@ -279,8 +279,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
     const embed = new EmbedBuilder().setTitle("Infos du serveur").setColor(0x00aeff).setDescription(lines.join("\n"));
     return interaction.reply({ embeds: [embed], ephemeral: true });
   }
-      }
-    }
+
 
     if (isBlacklistedUser || isBlacklistedRole) {
       return interaction.reply({
