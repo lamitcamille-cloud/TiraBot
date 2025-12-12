@@ -26,7 +26,7 @@ commands.push(
 commands.push(
   new SlashCommandBuilder()
     .setName("viewplayers")
-    .setDescription("Voir la liste des joueurs inscrits (pagination).")
+    .setDescription("Voir la liste des joueurs inscrits .")
 );
 
 commands.push(
