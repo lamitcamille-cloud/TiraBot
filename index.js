@@ -15,9 +15,7 @@ const {
 } = require("discord.js");
 const express = require("express");
 
-const TOKEN =
-   ||
-  "TON_TOKEN_ICI";
+const TOKEN = process.env.TOKEN || "TON_TOKEN_ICI";
 
 const guildStates = new Map();
 const pendingCalendars = new Map();
