@@ -293,7 +293,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
       content: "Tu es maintenant inscrit pour les tirages.",
       ephemeral: true
     });
-  }
+  
 
   if (interaction.commandName === "viewplayers") {
     // ✅ NO PAGINATION: on envoie un fichier + un embed court
